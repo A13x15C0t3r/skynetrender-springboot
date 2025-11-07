@@ -1,0 +1,49 @@
+server:
+  port: 8080 # Render usará este puerto
+
+spring:
+  jpa:
+    hibernate:
+      # ¡CAMBIO CRÍTICO!
+      # 'validate' comprueba que las tablas coincidan, pero NO las altera.
+      # NUNCA uses 'update' o 'create' en producción.
+      ddl-auto: validate
+    show-sql: true # Puedes dejarlo en 'true' para depurar en Render
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # ¡IMPORTANTE!
+  # Usaremos "Variables de Entorno" de Render en lugar de escribir
+  # las contraseñas directamente en el código.
+  # ${...} le dice a Spring: "Busca este valor en el sistema operativo".
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL} # Render nos dará esto
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: alexmarthketnest@gmail.com
+    password: 'mexceqaaklmcnyzc'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+# Las claves de JWT también las pasaremos por variables de entorno
+skynet:
+  security:
+    jwt:
+      secret-key: 'VGhpcyBpcyBhIHZlcnkgc2VjdXJlLCBsb25nLCBhbmQgcmFuZG9tIGtleSBmb3Igc2t5bmV0IHByb2plY3Qgc2VjcmV0IDUyNjM3MzY3MzY3MzY='
+      expiration: 3600000

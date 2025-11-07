@@ -1,0 +1,14 @@
+# Archivos compilados de Maven/Gradle
+target/
+build/
+
+# Logs
+*.log
+
+# Archivos del IDE (IntelliJ)
+.idea/
+*.iml
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
