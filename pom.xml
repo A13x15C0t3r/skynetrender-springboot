@@ -27,8 +27,7 @@
         <url/>
     </scm>
     <properties>
-        <!-- Usando Java 25 como tu versión objetivo -->
-        <java.version>25</java.version>
+        <java.version>21</java.version> <!-- Ajustamos a 21 LTS, la versión más estable en Docker -->
     </properties>
     <dependencies>
         <dependency>
@@ -102,6 +101,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <!-- QUITAMOS LA CONFIGURACIÓN VIEJA, DEJAMOS QUE SPRING BOOT LA INFIERA -->
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
@@ -109,12 +109,9 @@
                             <artifactId>lombok</artifactId>
                         </path>
                     </annotationProcessorPaths>
-                    <!--
-                    *** CORRECCIÓN CLAVE ***
-                    Se eliminan las etiquetas <source> y <target> para que Maven
-                    use la versión 25 definida en <java.version>.
-                    Esto evita el conflicto de la versión 9 que impedía la compilación.
-                    -->
+                    <!-- AÑADIMOS LA VERSIÓN DE JAVA PARA EL COMPILADOR -->
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <plugin>
