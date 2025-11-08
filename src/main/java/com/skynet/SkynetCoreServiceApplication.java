@@ -1,11 +1,13 @@
-package com.skynet; // ¡El paquete raíz!
+package com.skynet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class SkynetCoreServiceApplication {
-    static void main(String[] args) {
+
+    public static void main(String[] args) {
         SpringApplication.run(SkynetCoreServiceApplication.class, args);
     }
+
 }

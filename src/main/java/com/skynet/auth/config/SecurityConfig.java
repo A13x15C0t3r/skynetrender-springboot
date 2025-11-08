@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod; // <-- ¡EL IMPORT IMPORTANTE!
+import org.springframework.http.HttpMethod; // <-- ¡EL IMPORT CLAVE!
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,24 +42,26 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
+    /**
+     * Esta es la configuración de seguridad principal (FilterChain).
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
 
-                // ... (dentro de tu método filterChain en SecurityConfig.java)
-
+                // --- 1. CONFIGURACIÓN DE CORS ---
+                // Le dice a Spring que confíe en la URL de desarrollo de Vite
+                // ... dentro del método filterChain
                 .cors(cors -> cors.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
 
-                        // ¡CAMBIO CLAVE!
-                        // Permite peticiones desde CUALQUIER origen.
-                        // O, para más seguridad, reemplaza "*" por tu futura URL de Vercel.
+                        // Permitimos el origen local (por si acaso) y el origen público (*)
                         config.setAllowedOrigins(List.of(
-                                "http://localhost:5173", // Para desarrollo local
-                                "*"                      // Para el mundo (Render/Vercel)
+                                "http://localhost:5173",
+                                "*" // <-- Permite CUALQUIER origen (Necesario si no sabes la URL final)
                         ));
 
                         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -74,19 +76,20 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
+                // --- 2. REGLAS DE AUTORIZACIÓN ---
                 .authorizeHttpRequests(authz -> authz
 
-                        // --- ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA! ---
-                        // Le dice a Spring Security: "Permite TODAS las peticiones OPTIONS
-                        // de 'sondeo' de CORS antes de revisar los tokens".
+                        // ¡LA LÍNEA MÁGICA QUE ARREGLA EL "CARGANDO..."!
+                        // Permite todas las peticiones "preflight" OPTIONS del navegador
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // --- Tus reglas normales ---
-                        .requestMatchers("/api/auth/**").permitAll() // Para Login
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/clientes/**").hasAnyRole("ADMIN", "SUPERVISOR")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/supervisor/**").hasAnyRole("ADMIN", "SUPERVISOR")
                         .requestMatchers("/api/tecnico/**").hasRole("TECNICO")
+
                         .anyRequest().authenticated()
                 )
 

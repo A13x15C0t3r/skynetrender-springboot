@@ -1,29 +1,25 @@
 package com.skynet.business.service;
 
 import com.skynet.business.model.Visita;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+// ¡Añadimos los imports que faltaban para la lista!
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.MessagingException;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.core.io.ByteArrayResource;
 
 @Service
 public class EmailService {
 
-    // 1. Declara los campos como 'final' (inmutables)
     private final JavaMailSender mailSender;
     private final String fromEmail;
 
-    /**
-     * 2. Usa un constructor para la Inyección de Dependencias.
-     * Spring inyectará automáticamente el 'mailSender' y el valor 'fromEmail' aquí.
-     * Tu IDE ahora verá que los campos SÍ se están asignando.
-     */
     @Autowired
     public EmailService(JavaMailSender mailSender,
                         @Value("${spring.mail.username}") String fromEmail) {
@@ -33,7 +29,7 @@ public class EmailService {
 
     /**
      * Envía un email de reporte de visita completada CON el PDF adjunto.
-     * * ¡VERSIÓN ACTUALIZADA!
+     * ¡VERSIÓN ACTUALIZADA!
      * Ahora envía el correo tanto al Supervisor como al Cliente.
      */
     public void enviarReporteVisitaConAdjunto(Visita visita, byte[] pdfBytes) {
@@ -48,10 +44,13 @@ public class EmailService {
         // Destinatario 2: El Cliente (opcional)
         String clienteEmail = visita.getCliente().getCorreo();
 
-        // Verificamos que el cliente tenga un email registrado y no esté vacío
-        if (clienteEmail != null && !clienteEmail.isBlank()) {
+        // --- ¡AQUÍ ESTÁ LA CORRECCIÓN DE JAVA 8! ---
+        // Reemplazamos !clienteEmail.isBlank() (Java 11)
+        // por su equivalente en Java 8.
+        if (clienteEmail != null && !clienteEmail.trim().isEmpty()) {
             destinatarios.add(clienteEmail);
         }
+        // --- FIN DE LA CORRECCIÓN ---
 
         // --- 2. Preparar el contenido del email ---
         String subject = "Visita Completada (ID: " + visita.getId() + ") - Cliente: " + visita.getCliente().getNombreEmpresa();
