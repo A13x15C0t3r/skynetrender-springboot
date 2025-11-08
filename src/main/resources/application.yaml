@@ -1,37 +1,35 @@
 server:
-  port: 8080
+  port: 8080 # Render usará este puerto
 
 spring:
-  datasource:
-    # 1. OBTÉN ESTOS DATOS DE TU PANEL DE SUPABASE
-    url: jdbc:postgresql://db.ewqywxokrjxppllywruc.supabase.co:5432/postgres
-    username: postgres
-    # 2. VE A SUPABASE Y RESETEA LA CONTRASEÑA, LUEGO PEGA LA NUEVA AQUÍ
-    password: 'proyectoumg'
-    driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
-      # Usaremos 'update' para que cree las tablas por nosotros esta primera vez.
-      ddl-auto: update
-    show-sql: true
+      # ¡CAMBIO CRÍTICO!
+      # 'validate' comprueba que las tablas coincidan, pero NO las altera.
+      # NUNCA uses 'update' o 'create' en producción.
+      ddl-auto: validate
+    show-sql: true # Puedes dejarlo en 'true' para depurar en Render
     properties:
       hibernate:
         format_sql: true
-        # Es mejor dejar el dialecto para asegurar que se conecte
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-    # ==================================
-    # CONFIGURACIÓN DE EMAIL (GMAIL)
-    # ==================================
+  # ¡IMPORTANTE!
+  # Usaremos "Variables de Entorno" de Render en lugar de escribir
+  # las contraseñas directamente en el código.
+  # ${...} le dice a Spring: "Busca este valor en el sistema operativo".
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL} # Render nos dará esto
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
 
   mail:
     host: smtp.gmail.com
     port: 587
-    # El email que usará la app para enviar correos
     username: alexmarthketnest@gmail.com
-    # La contraseña de aplicación de 16 letras que generaste
-    password: 'mexceqaaklmcnyzc' # ¡NO es tu pass normal!
+    password: 'mexceqaaklmcnyzc'
     properties:
       mail:
         smtp:
@@ -39,21 +37,13 @@ spring:
           starttls:
             enable: true
 
-      # --- ¡ESTA ES LA CORRECCIÓN! ---
-      # Le dice a Spring que use el "viejo"
-      # motor de coincidencias de URL, que es más flexible.
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
 
-        # ==================================
-        # CONFIGURACIÓN DE SEGURIDAD JWT
-      # ==================================
+# Las claves de JWT también las pasaremos por variables de entorno
 skynet:
   security:
     jwt:
-      # Esta es la llave secreta que Spring no pudo encontrar
       secret-key: 'VGhpcyBpcyBhIHZlcnkgc2VjdXJlLCBsb25nLCBhbmQgcmFuZG9tIGtleSBmb3Igc2t5bmV0IHByb2plY3Qgc2VjcmV0IDUyNjM3MzY3MzY3MzY='
-
-      # Tiempo de expiración (1 hora en milisegundos)
       expiration: 3600000

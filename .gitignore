@@ -1,6 +1,9 @@
 # Archivos compilados de Maven/Gradle
-#gittarget/
+gittarget/
 build/
+
+target/
+*.jar
 
 # Logs
 *.log
